@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Simple RSS Reader</string>
+    <string name="action_settings">Settings</string>
+    <string name="error_connection_timeout">Connection timed out!</string>
+    <string name="error_authentication_failure">Authentication failure!</string>
+    <string name="error_response">Error response!</string>
+    <string name="error_network">Network error!</string>
+    <string name="error_server_response">Server\'s response could not be recognized!</string>
+
+
+</resources>
