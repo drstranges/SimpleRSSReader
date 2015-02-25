@@ -1,13 +1,15 @@
 package com.drprog.simplerssreader;
 
+import android.content.ContentValues;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+
+import com.drprog.simplerssreader.data.DataContract;
+
+import java.util.Date;
+import java.util.Vector;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -18,9 +20,10 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new MainFragment())
                     .commit();
         }
+        //test
     }
 
 
@@ -42,23 +45,33 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             return true;
         }
+        if (id == R.id.test){
+            test();
+        }
 
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
+    private void test() {
+        Vector<ContentValues> vector = new Vector<ContentValues>();
+        long date = (new Date()).getTime();
+        for (int i=0; i<10; i++) {
+            ContentValues cv = new ContentValues();
 
-        public PlaceholderFragment() {
+            cv.put(DataContract.StoryEntry.COLUMN_TITLE, "TestTitle" + i);
+            cv.put(DataContract.StoryEntry.COLUMN_PUB_DATE, date + i*1000*60*15);
+            cv.put(DataContract.StoryEntry.COLUMN_AUTHOR, "TestAuthor");
+            cv.put(DataContract.StoryEntry.COLUMN_IMG_URL,
+                   "http://i.cbc.ca/1.2970039.1424812686!/fileImage/httpImage/image.jpg_gen/derivatives/16x9_460/parliament-hill-security.jpg");
+            cv.put(DataContract.StoryEntry.COLUMN_LINK,
+                   "http://www.cbc.ca/news/world/isis-recruited-canadian-woman-to-join-fight-in-syria-1.2970535?cmp=rss" +i);
+
+            vector.add(cv);
         }
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
+        ContentValues[] cvArray = new ContentValues[vector.size()];
+        vector.toArray(cvArray);
+        getContentResolver().bulkInsert(DataContract.StoryEntry.CONTENT_URI, cvArray);
     }
+
 }
