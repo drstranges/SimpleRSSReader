@@ -1,31 +1,14 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".MainActivity$PlaceholderFragment">
+<android.support.v4.widget.SwipeRefreshLayout
+    android:id="@+id/swipe_refresh_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:layout_marginTop="8dp">
 
-    <include
-        android:id="@+id/app_bar"
-        layout="@layout/app_bar"/>
-
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
+    <ListView
+        android:id="@+id/story_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_below="@+id/app_bar">
+        android:layout_height="match_parent"/>
 
-        <ListView
-            android:id="@+id/story_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </android.support.v4.widget.SwipeRefreshLayout>
-
-</RelativeLayout>
-
-<!--<android.support.v7.widget.RecyclerView-->
-<!--android:id="@+id/story_list"-->
-<!--android:layout_width="match_parent"-->
-<!--android:layout_height="wrap_content"/>-->
+</android.support.v4.widget.SwipeRefreshLayout>

@@ -10,8 +10,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +38,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private static final String KEY_SELECTED_POSITION = "KEY_SELECTED_POSITION";
 
-    private Toolbar mToolbar;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private SimpleCursorAdapter mCursorAdapter;
@@ -66,7 +64,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mToolbar = (Toolbar) rootView.findViewById(R.id.app_bar);
         mListView = (ListView) rootView.findViewById(R.id.story_list);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh_layout);
         return rootView;
@@ -74,9 +71,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        if (mToolbar != null) {
-            ((ActionBarActivity) getActivity()).setSupportActionBar(mToolbar);
-        }
+
 
         String[] from = new String[]{
                 DataContract.StoryEntry.COLUMN_TITLE,

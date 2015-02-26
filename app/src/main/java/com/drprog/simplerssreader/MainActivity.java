@@ -3,16 +3,22 @@ package com.drprog.simplerssreader;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 
 
 public class MainActivity extends ActionBarActivity implements MainFragment.Callback{
 
+    private Toolbar mToolbar;
     private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mToolbar = (Toolbar) findViewById(R.id.app_bar);
+        if (mToolbar != null) {
+            setSupportActionBar(mToolbar);
+        }
 
         if (findViewById(R.id.detail_container) != null) {
             // The detail container will be present only in the large-screen layouts
