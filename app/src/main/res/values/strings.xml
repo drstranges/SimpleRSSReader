@@ -10,6 +10,9 @@
     <string name="error_response">Error response!</string>
     <string name="error_network">Network error!</string>
     <string name="error_server_response">Server\'s response could not be recognized!</string>
+    <string name="title_activity_detail">Story detail</string>
+
+    <string name="hello_world">Hello world!</string>
 
 
 </resources>

@@ -12,13 +12,16 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.drprog.simplerssreader.data.DataContract;
 import com.drprog.simplerssreader.sync.SyncManager;
+import com.drprog.simplerssreader.utils.Utils;
 
 /**
  * Main screen with the List of Stories
@@ -27,18 +30,33 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private static final int STORIES_LOADER = 201;
     private static final String[] STORY_COLUMNS = {
-            DataContract.StoryEntry.TABLE_NAME + "." + DataContract.StoryEntry._ID,
+            DataContract.StoryEntry._ID,
             DataContract.StoryEntry.COLUMN_TITLE,
             DataContract.StoryEntry.COLUMN_PUB_DATE,
             DataContract.StoryEntry.COLUMN_AUTHOR,
-            DataContract.StoryEntry.COLUMN_IMG_URL
+            DataContract.StoryEntry.COLUMN_IMG_URL,
+            DataContract.StoryEntry.COLUMN_LINK
     };
 
+    private static final String KEY_SELECTED_POSITION = "KEY_SELECTED_POSITION";
 
     private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private SimpleCursorAdapter mCursorAdapter;
+    private int mPosition = ListView.INVALID_POSITION;
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * Callback when an item has been selected.
+         */
+        public void onItemSelected(String detailUrl);
+    }
 
     public MainFragment() {
     }
@@ -75,6 +93,27 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                                                 SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         mListView.setAdapter(mCursorAdapter);
 
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position,
+                    long l) {
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                if (cursor != null) {
+                    int columnIndex = cursor.getColumnIndex(DataContract.StoryEntry.COLUMN_LINK);
+                    String link = cursor.getString(columnIndex);
+                    Log.d(Utils.LOG_TAG,"Link: " + link);
+                    ((Callback) getActivity())
+                            .onItemSelected(link);
+                }
+                mPosition = position;
+            }
+        });
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_SELECTED_POSITION)) {
+            mPosition = savedInstanceState.getInt(KEY_SELECTED_POSITION);
+        }
+
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -82,12 +121,21 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             }
         });
 
+
         getLoaderManager().initLoader(STORIES_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
     private void startSync() {
         SyncManager.startSync(getActivity().getApplicationContext());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(KEY_SELECTED_POSITION, mPosition);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -107,16 +155,14 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
-//        if (mPosition != ListView.INVALID_POSITION) {
-//            mListView.smoothScrollToPosition(mPosition);
-//        }
+        if (mPosition != ListView.INVALID_POSITION) {
+            mListView.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mCursorAdapter.swapCursor(null);
     }
-
-
 
 }
