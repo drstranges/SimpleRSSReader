@@ -1,5 +1,6 @@
 package com.drprog.simplerssreader;
 
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,15 +17,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.drprog.simplerssreader.data.DataContract;
 import com.drprog.simplerssreader.sync.SyncManager;
+import com.drprog.simplerssreader.sync.SyncStatusReceiver;
 import com.drprog.simplerssreader.utils.Utils;
 
 /**
  * Main screen with the List of Stories
  */
-public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,SyncStatusReceiver.OnSyncStatusListener {
 
     private static final int STORIES_LOADER = 201;
     private static final String[] STORY_COLUMNS = {
@@ -38,7 +41,8 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private static final String KEY_SELECTED_POSITION = "KEY_SELECTED_POSITION";
 
-
+    private SyncStatusReceiver mSyncStatusReceiver;
+    private IntentFilter mIntentFilter = new IntentFilter(SyncManager.INTENT_SYNC_STATUS_ACTION);
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private SimpleCursorAdapter mCursorAdapter;
@@ -72,7 +76,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 
-
+        //TODO: Create and use custom adapter
         String[] from = new String[]{
                 DataContract.StoryEntry.COLUMN_TITLE,
                 DataContract.StoryEntry.COLUMN_PUB_DATE,
@@ -116,9 +120,24 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             }
         });
 
+        mSyncStatusReceiver = new SyncStatusReceiver(this);
 
         getLoaderManager().initLoader(STORIES_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(mSyncStatusReceiver, mIntentFilter);
+    }
+
+    @Override
+    public void onPause() {
+        getActivity().unregisterReceiver(mSyncStatusReceiver);
+        //TODO: think about it :)
+        mSwipeRefreshLayout.setRefreshing(false);
+        super.onPause();
     }
 
     private void startSync() {
@@ -158,6 +177,22 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mCursorAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onSyncStarted() {
+        //Do nothing
+    }
+
+    @Override
+    public void onSyncFinished() {
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void onSyncFailed(String error) {
+        mSwipeRefreshLayout.setRefreshing(false);
+        Toast.makeText(getActivity(),error,Toast.LENGTH_LONG).show();
     }
 
 }

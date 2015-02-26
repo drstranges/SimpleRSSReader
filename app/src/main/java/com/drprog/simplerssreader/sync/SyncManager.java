@@ -20,10 +20,10 @@ import org.xmlpull.v1.XmlPullParserException;
 public class SyncManager {
 
     private static final String TARGET_URL = "http://www.cbc.ca/cmlink/rss-topstories";
-    private static final String INTENT_SYNC_STATUS_ACTION =
+    public static final String INTENT_SYNC_STATUS_ACTION =
             "com.drprog.simplerssreader.SYNC_STATUS";
-    private static final String INTENT_SYNC_STATUS_EXTRA_STATUS = "INTENT_SYNC_STATUS_EXTRA_STATUS";
-    private static final String INTENT_SYNC_STATUS_EXTRA_ERROR = "INTENT_SYNC_STATUS_EXTRA_ERROR";
+    public static final String INTENT_SYNC_STATUS_EXTRA_STATUS = "INTENT_SYNC_STATUS_EXTRA_STATUS";
+    public static final String INTENT_SYNC_STATUS_EXTRA_ERROR = "INTENT_SYNC_STATUS_EXTRA_ERROR";
     private static final String REQUEST_TAG = "REQUEST_TAG";
 
 
