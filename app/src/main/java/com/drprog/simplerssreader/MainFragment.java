@@ -9,6 +9,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.drprog.simplerssreader.data.DataContract;
+import com.drprog.simplerssreader.sync.SyncManager;
 
 /**
  * Created on 25.02.2015.
@@ -35,6 +37,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private Toolbar mToolbar;
     //private RecyclerView recyclerView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private SimpleCursorAdapter mCursorAdapter;
     //private LinearLayoutManager mLinearLayoutManager;
@@ -63,6 +66,14 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                                                 null,from,to,
                                                 SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         mListView.setAdapter(mCursorAdapter);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                startSync();
+            }
+        });
+
         //mViewAdapter = new StoryAdapter(this, null);
         //recyclerView.setAdapter(mViewAdapter);
 //        recyclerView
@@ -77,6 +88,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         super.onActivityCreated(savedInstanceState);
     }
 
+    private void startSync() {
+        SyncManager.startSync(getActivity().getApplicationContext());
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -86,7 +101,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
         //recyclerView = (RecyclerView) rootView.findViewById(R.id.story_list);
         mListView = (ListView) rootView.findViewById(R.id.story_list);
-
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh_layout);
         return rootView;
     }
 
