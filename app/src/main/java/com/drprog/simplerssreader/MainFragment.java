@@ -21,7 +21,7 @@ import com.drprog.simplerssreader.data.DataContract;
 import com.drprog.simplerssreader.sync.SyncManager;
 
 /**
- * Created on 25.02.2015.
+ * Main screen with the List of Stories
  */
 public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -36,14 +36,22 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
 
     private Toolbar mToolbar;
-    //private RecyclerView recyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private SimpleCursorAdapter mCursorAdapter;
-    //private LinearLayoutManager mLinearLayoutManager;
-
 
     public MainFragment() {
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        mToolbar = (Toolbar) rootView.findViewById(R.id.app_bar);
+        mListView = (ListView) rootView.findViewById(R.id.story_list);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh_layout);
+        return rootView;
     }
 
     @Override
@@ -74,35 +82,12 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             }
         });
 
-        //mViewAdapter = new StoryAdapter(this, null);
-        //recyclerView.setAdapter(mViewAdapter);
-//        recyclerView
-//                .addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-        //recyclerView.setHasFixedSize(true);
-        //mLinearLayoutManager = new LinearLayoutManager(getActivity());
-        //recyclerView.setLayoutManager(mLinearLayoutManager);
-        //recyclerView.setItemAnimator(new DefaultItemAnimator());
-
         getLoaderManager().initLoader(STORIES_LOADER, null, this);
-
         super.onActivityCreated(savedInstanceState);
     }
 
     private void startSync() {
         SyncManager.startSync(getActivity().getApplicationContext());
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-        mToolbar = (Toolbar) rootView.findViewById(R.id.app_bar);
-
-        //recyclerView = (RecyclerView) rootView.findViewById(R.id.story_list);
-        mListView = (ListView) rootView.findViewById(R.id.story_list);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh_layout);
-        return rootView;
     }
 
     @Override
@@ -131,4 +116,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onLoaderReset(Loader<Cursor> loader) {
         mCursorAdapter.swapCursor(null);
     }
+
+
+
 }

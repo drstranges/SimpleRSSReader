@@ -12,6 +12,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.drprog.simplerssreader.data.DataContract;
 import com.drprog.simplerssreader.utils.Utils;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 /**
  * Synchronization Manager
  */
@@ -84,7 +86,14 @@ public class SyncManager {
      */
     private static void processResponse(Context context, String response) {
         Log.d(Utils.LOG_TAG, response);
-        ContentValues[] cvArray = ParserHelper.parseXML(context, response);
+        ContentValues[] cvArray = new ContentValues[0];
+        try {
+            cvArray = ParserHelper.parseXML(context, response);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+            sendSyncStatusBroadcast(context, SyncStatus.SYNC_ERROR, new VolleyError(e.getMessage()));
+            return;
+        }
         if (cvArray.length > 0) {
             context.getContentResolver().bulkInsert(DataContract.StoryEntry.CONTENT_URI, cvArray);
         }

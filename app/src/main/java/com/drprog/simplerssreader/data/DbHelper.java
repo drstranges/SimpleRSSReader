@@ -19,11 +19,11 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String SCRIPT_CREATE_TABLE_STORY = "CREATE TABLE " +
             StoryEntry.TABLE_NAME + " ( " +
             StoryEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            StoryEntry.COLUMN_TITLE + " TEXT, " +
-            StoryEntry. COLUMN_AUTHOR + " TEXT, " +
             StoryEntry.COLUMN_PUB_DATE + " INTEGER NOT NULL, " +
+            StoryEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
+            StoryEntry.COLUMN_LINK + " TEXT NOT NULL, " +
+            StoryEntry. COLUMN_AUTHOR + " TEXT, " +
             StoryEntry.COLUMN_IMG_URL + " TEXT, " +
-            StoryEntry.COLUMN_LINK + " TEXT, " +
             " UNIQUE(" + StoryEntry.COLUMN_LINK + ") ON CONFLICT REPLACE);";
 
 

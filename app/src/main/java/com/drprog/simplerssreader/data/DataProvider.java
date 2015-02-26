@@ -217,4 +217,24 @@ public class DataProvider extends ContentProvider{
                 return super.bulkInsert(uri, values);
         }
     }
+
+
+    public static ContentValues buildCV(Long pubDate, String title, String linkUrl, String author, String imageUrl) {
+        if (title == null || title.isEmpty()
+                || pubDate == null || linkUrl == null || linkUrl.isEmpty()){
+            return null;
+        }
+
+        ContentValues cv = new ContentValues();
+        cv.put(DataContract.StoryEntry.COLUMN_TITLE, title);
+        cv.put(DataContract.StoryEntry.COLUMN_PUB_DATE, pubDate);
+        cv.put(DataContract.StoryEntry.COLUMN_LINK, linkUrl);
+        if(author != null){
+            cv.put(DataContract.StoryEntry.COLUMN_AUTHOR, author);
+        }
+        if(imageUrl != null) {
+            cv.put(DataContract.StoryEntry.COLUMN_IMG_URL, imageUrl);
+        }
+        return cv;
+    }
 }
