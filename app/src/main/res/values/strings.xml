@@ -13,6 +13,9 @@
     <string name="title_activity_detail">Story detail</string>
 
     <string name="hello_world">Hello world!</string>
+    <string name="empty_list_message">Swipe Down to Refresh…</string>
+    <string name="error_parse_exception">Some parsing error.</string>
+    <string name="action_clear_data">Clear list</string>
 
 
 </resources>

@@ -11,7 +11,7 @@ import android.net.Uri;
 /**
  * ContentProvider for access to the database
  */
-public class DataProvider extends ContentProvider{
+public class DataProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private DbHelper mDbHelper;
@@ -22,7 +22,7 @@ public class DataProvider extends ContentProvider{
 
     private static final SQLiteQueryBuilder sStoryByDateQueryBuilder;
 
-    static{
+    static {
         sStoryByDateQueryBuilder = new SQLiteQueryBuilder();
         sStoryByDateQueryBuilder.setTables(DataContract.StoryEntry.TABLE_NAME);
         //Will be modified when there are more tables
@@ -47,12 +47,12 @@ public class DataProvider extends ContentProvider{
         }
 
         return sStoryByDateQueryBuilder.query(mDbHelper.getReadableDatabase(),
-                                                           projection,
-                                                           selection,
-                                                           selectionArgs,
-                                                           null,
-                                                           null,
-                                                           sortOrder
+                                              projection,
+                                              selection,
+                                              selectionArgs,
+                                              null,
+                                              null,
+                                              sortOrder
         );
     }
 
@@ -66,7 +66,6 @@ public class DataProvider extends ContentProvider{
                        CODE_STORY_WITH_START_DATE);
         return matcher;
     }
-
 
 
     @Override
@@ -96,8 +95,7 @@ public class DataProvider extends ContentProvider{
         Cursor cur;
         switch (sUriMatcher.match(uri)) {
             // "stories/#"
-            case CODE_STORY_WITH_START_DATE:
-            {
+            case CODE_STORY_WITH_START_DATE: {
                 cur = getStoriesByStartDate(uri, projection, sortOrder);
                 break;
             }
@@ -132,10 +130,9 @@ public class DataProvider extends ContentProvider{
             case CODE_STORY: {
                 //normalize Date if needed
                 long id = db.insert(DataContract.StoryEntry.TABLE_NAME, null, values);
-                if ( id > 0 )
-                    returnUri = DataContract.StoryEntry.buildItemUri(id);
-                else
+                if (id > 0) { returnUri = DataContract.StoryEntry.buildItemUri(id); } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
+                }
                 break;
             }
             //case another table
@@ -152,7 +149,7 @@ public class DataProvider extends ContentProvider{
         final int match = sUriMatcher.match(uri);
         int rowsDeleted;
         // To remove all rows and get a count pass "1" as the whereClause.
-        if ( null == selection ) selection = "1";
+        if (null == selection) selection = "1";
         switch (match) {
             case CODE_STORY:
                 rowsDeleted = db.delete(
@@ -219,9 +216,10 @@ public class DataProvider extends ContentProvider{
     }
 
 
-    public static ContentValues buildCV(Long pubDate, String title, String linkUrl, String author, String imageUrl) {
+    public static ContentValues buildCV(Long pubDate, String title, String linkUrl, String author,
+            String imageUrl) {
         if (title == null || title.isEmpty()
-                || pubDate == null || linkUrl == null || linkUrl.isEmpty()){
+                || pubDate == null || linkUrl == null || linkUrl.isEmpty()) {
             return null;
         }
 
@@ -229,10 +227,10 @@ public class DataProvider extends ContentProvider{
         cv.put(DataContract.StoryEntry.COLUMN_TITLE, title);
         cv.put(DataContract.StoryEntry.COLUMN_PUB_DATE, pubDate);
         cv.put(DataContract.StoryEntry.COLUMN_LINK, linkUrl);
-        if(author != null){
+        if (author != null) {
             cv.put(DataContract.StoryEntry.COLUMN_AUTHOR, author);
         }
-        if(imageUrl != null) {
+        if (imageUrl != null) {
             cv.put(DataContract.StoryEntry.COLUMN_IMG_URL, imageUrl);
         }
         return cv;

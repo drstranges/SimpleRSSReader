@@ -1,6 +1,6 @@
 package com.drprog.simplerssreader;
 
-import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,17 +11,21 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 /**
- * Created on 26.02.2015.
+ * Detail Screen
  */
-public class DetailFragment extends Fragment{
+public class DetailFragment extends Fragment {
     public static final String TAG = DetailFragment.class.getSimpleName();
     static final String DETAIL_URL = "URL";
     private String mUrl;
+    private WebView mWebView;
+    private ProgressBar progressBar;
 
-    public static DetailFragment newInstance(String detailUrl){
+
+    public static DetailFragment newInstance(String detailUrl) {
         DetailFragment fragment = new DetailFragment();
         Bundle args = new Bundle();
         args.putString(DetailFragment.DETAIL_URL, detailUrl);
@@ -43,35 +47,57 @@ public class DetailFragment extends Fragment{
         }
 
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-        WebView webView = (WebView)rootView.findViewById(R.id.webView);
+        mWebView = (WebView) rootView.findViewById(R.id.webView);
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
 
 
-        //getActivity().getWindow().requestFeature(Window.FEATURE_PROGRESS);
-
-        final Activity activity = getActivity();
-        webView.setWebChromeClient(new WebChromeClient() {
+        //final Activity activity = getActivity();
+        mWebView.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, int progress) {
-                // Activities and WebViews measure progress with different scales.
-                // The progress meter will automatically disappear when we reach 100%
-                activity.setProgress(progress * 1000);
+                //activity.setProgress(progress * 1000);
             }
+
         });
-        webView.setWebViewClient(new WebViewClient() {
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
+        mWebView.setWebViewClient(new WebViewClient() {
+            public void onReceivedError(WebView view, int errorCode, String description,
+                    String failingUrl) {
+                Toast.makeText(getActivity(), description, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                progressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                progressBar.setVisibility(View.INVISIBLE);
             }
         });
 
-        WebSettings webSettings = webView.getSettings();
+        WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setBuiltInZoomControls(true);
 
-        if (mUrl != null){
-            webView.loadUrl(mUrl);
+        mWebView.requestFocusFromTouch();
+
+
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
+
+        //String newUA= "Mozilla/5.0";
+        //webSettings.setUserAgentString(newUA);
+
+        if (mUrl != null) {
+            mWebView.loadUrl(mUrl);
         }
 
 
         return rootView;
     }
+
+
 }

@@ -3,12 +3,14 @@ package com.drprog.simplerssreader.sync;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.drprog.simplerssreader.R;
 import com.drprog.simplerssreader.data.DataContract;
 import com.drprog.simplerssreader.utils.Utils;
 
@@ -20,10 +22,11 @@ import org.xmlpull.v1.XmlPullParserException;
 public class SyncManager {
 
     private static final String TARGET_URL = "http://www.cbc.ca/cmlink/rss-topstories";
-    public static final String INTENT_SYNC_STATUS_ACTION =
-            "com.drprog.simplerssreader.SYNC_STATUS";
+
+    public static final String INTENT_SYNC_STATUS_ACTION = "com.drprog.simplerssreader.SYNC_STATUS";
     public static final String INTENT_SYNC_STATUS_EXTRA_STATUS = "INTENT_SYNC_STATUS_EXTRA_STATUS";
     public static final String INTENT_SYNC_STATUS_EXTRA_ERROR = "INTENT_SYNC_STATUS_EXTRA_ERROR";
+
     private static final String REQUEST_TAG = "REQUEST_TAG";
 
 
@@ -38,12 +41,13 @@ public class SyncManager {
 
     /**
      * Method for initiating the process of synchronization.
-     * @param context    application context
+     *
+     * @param context application context
      */
     public static void startSync(Context context) {
         if (!ConnectionManager.isOnline(context)) {
             //Internet connection is not available
-            sendSyncStatusBroadcast(context,SyncStatus.SYNC_ERROR_NO_INTERNET,null);
+            sendSyncStatusBroadcast(context, SyncStatus.SYNC_ERROR_NO_INTERNET, null);
             return;
         }
 
@@ -58,8 +62,9 @@ public class SyncManager {
 
     /**
      * Method for building the Volley Request.
-     * @param context    application context
-     * @param url        the target url
+     *
+     * @param context application context
+     * @param url     the target url
      * @return the Volley Request
      */
     private static Request getRequest(Context context, String url) {
@@ -67,7 +72,7 @@ public class SyncManager {
         Response.Listener<String> responseListener = new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                processResponse(ctx, response);
+                processResponseAsync(ctx, response);
             }
         };
         Response.ErrorListener errorListener = new Response.ErrorListener() {
@@ -79,31 +84,89 @@ public class SyncManager {
         return new StringRequest(Request.Method.GET, url, responseListener, errorListener);
     }
 
-    /**
-     * Method for processing the response from the host
-     * @param context     application context
-     * @param response    String witch was taken as response on request to the host.
-     */
-    private static void processResponse(Context context, String response) {
-        Log.d(Utils.LOG_TAG, response);
-        ContentValues[] cvArray = new ContentValues[0];
-        try {
-            cvArray = ParserHelper.parseXML(context, response);
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-            sendSyncStatusBroadcast(context, SyncStatus.SYNC_ERROR, new VolleyError(e.getMessage()));
-            return;
+    private static class ResponseProcessTask extends AsyncTask<String, Void, ContentValues[]> {
+        private Context mContext;
+
+        private void setContext(Context context) {
+            this.mContext = context;
         }
-        if (cvArray.length > 0) {
-            context.getContentResolver().bulkInsert(DataContract.StoryEntry.CONTENT_URI, cvArray);
+
+        @Override
+        protected ContentValues[] doInBackground(String... params) {
+            String response = params[0];
+            try {
+                return ParserHelper.parseXML(response);
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
-        sendSyncStatusBroadcast(context, SyncStatus.SYNC_FINISH, null);
+
+        @Override
+        protected void onPostExecute(ContentValues[] cvArray) {
+            if (cvArray == null) {
+                sendSyncStatusBroadcast(mContext, SyncStatus.SYNC_ERROR,
+                                        new VolleyError(mContext.getString(
+                                                R.string.error_parse_exception)));
+                return;
+            }
+            if (cvArray.length > 0) {
+                mContext.getContentResolver().delete(DataContract.StoryEntry.CONTENT_URI,
+                                                     null,
+                                                     new String[]{});
+                mContext.getContentResolver()
+                        .bulkInsert(DataContract.StoryEntry.CONTENT_URI, cvArray);
+            }
+            sendSyncStatusBroadcast(mContext, SyncStatus.SYNC_FINISH, null);
+        }
     }
 
     /**
+     * Method for asynchronous processing the response from the host
+     *
+     * @param context  application context
+     * @param response String witch was taken as response on request to the host.
+     */
+    private static void processResponseAsync(Context context, String response) {
+        Log.d(Utils.LOG_TAG, response);
+
+        ResponseProcessTask task = new ResponseProcessTask();
+        task.setContext(context);
+        task.execute(response);
+    }
+
+
+    /**
+     * Method for processing the response from the host
+     *
+     * @param context  application context
+     * @param response String witch was taken as response on request to the host.
+     */
+//    private static void processResponse(Context context, String response) {
+//        Log.d(Utils.LOG_TAG, response);
+//        ContentValues[] cvArray;// = new ContentValues[0];
+//        try {
+//            cvArray = ParserHelper.parseXML(response);
+//        } catch (XmlPullParserException e) {
+//            e.printStackTrace();
+//            sendSyncStatusBroadcast(context, SyncStatus.SYNC_ERROR,
+//                                    new VolleyError(e.getMessage()));
+//            return;
+//        }
+//        if (cvArray.length > 0) {
+//            context.getContentResolver().delete(DataContract.StoryEntry.CONTENT_URI,
+//                                                null,
+//                                                new String[]{});
+//            context.getContentResolver().bulkInsert(DataContract.StoryEntry.CONTENT_URI, cvArray);
+//        }
+//        sendSyncStatusBroadcast(context, SyncStatus.SYNC_FINISH, null);
+//    }
+
+    /**
      * Method for processing any error witch were taken in process of requesting.
-     * @param context    application context
-     * @param error      {@link VolleyError} witch was taken in process of requesting
+     *
+     * @param context application context
+     * @param error   {@link VolleyError} witch was taken in process of requesting
      */
     private static void processError(Context context, VolleyError error) {
         sendSyncStatusBroadcast(context, SyncStatus.SYNC_ERROR, error);
@@ -111,10 +174,11 @@ public class SyncManager {
 
     /**
      * Method for sending SyncStatusBroadcast
-     * @param context    application context
-     * @param status     {@link SyncStatus} Can be set as SYNC_START, SYNC_FINISH or SYNC_ERROR.
-     * @param error      {@link VolleyError} witch was taken in process of preparing
-     *   or making the request. Need if {@param status} is set as SYNC_ERROR, can be NULL otherwise.
+     *
+     * @param context application context
+     * @param status  {@link SyncStatus} Can be set as SYNC_START, SYNC_FINISH or SYNC_ERROR.
+     * @param error   {@link VolleyError} witch was taken in process of preparing
+     *                or making the request. Need if {@param status} is set as SYNC_ERROR, can be NULL otherwise.
      */
     public static void sendSyncStatusBroadcast(Context context, SyncStatus status,
             VolleyError error) {

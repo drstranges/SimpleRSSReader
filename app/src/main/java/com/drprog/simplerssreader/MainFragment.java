@@ -13,10 +13,14 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.drprog.simplerssreader.data.DataContract;
@@ -27,7 +31,8 @@ import com.drprog.simplerssreader.utils.Utils;
 /**
  * Main screen with the List of Stories
  */
-public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,SyncStatusReceiver.OnSyncStatusListener {
+public class MainFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor>, SyncStatusReceiver.OnSyncStatusListener {
 
     private static final int STORIES_LOADER = 201;
     private static final String[] STORY_COLUMNS = {
@@ -45,8 +50,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     private IntentFilter mIntentFilter = new IntentFilter(SyncManager.INTENT_SYNC_STATUS_ACTION);
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
-    private SimpleCursorAdapter mCursorAdapter;
+    private TextView mEmptyView;
+    private ImgCursorAdapter mCursorAdapter;
     private int mPosition = ListView.INVALID_POSITION;
+
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -68,28 +75,22 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        setHasOptionsMenu(true);
         mListView = (ListView) rootView.findViewById(R.id.story_list);
+        mEmptyView = (TextView) rootView.findViewById(android.R.id.empty);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh_layout);
+        mSwipeRefreshLayout.setColorSchemeResources(
+                R.color.refresh_progress_1,
+                R.color.refresh_progress_2,
+                R.color.refresh_progress_3);
         return rootView;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 
-        //TODO: Create and use custom adapter
-        String[] from = new String[]{
-                DataContract.StoryEntry.COLUMN_TITLE,
-                DataContract.StoryEntry.COLUMN_PUB_DATE,
-                DataContract.StoryEntry.COLUMN_AUTHOR
-        };
-        int[] to = new int[]{
-                R.id.titleView,
-                R.id.timeView,
-                R.id.authorView
-        };
-        mCursorAdapter = new SimpleCursorAdapter(getActivity(),R.layout.list_item,
-                                                null,from,to,
-                                                SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+        mCursorAdapter = new ImgCursorAdapter(getActivity(), null,
+                                              SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         mListView.setAdapter(mCursorAdapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -101,7 +102,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 if (cursor != null) {
                     int columnIndex = cursor.getColumnIndex(DataContract.StoryEntry.COLUMN_LINK);
                     String link = cursor.getString(columnIndex);
-                    Log.d(Utils.LOG_TAG,"Link: " + link);
+                    Log.d(Utils.LOG_TAG, "Link: " + link);
                     ((Callback) getActivity())
                             .onItemSelected(link);
                 }
@@ -135,9 +136,31 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onPause() {
         getActivity().unregisterReceiver(mSyncStatusReceiver);
-        //TODO: think about it :)
-        mSwipeRefreshLayout.setRefreshing(false);
         super.onPause();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_clear_data) {
+            clearDatabase();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void clearDatabase() {
+        mPosition = ListView.INVALID_POSITION;
+        ((Callback) getActivity()).onItemSelected(null);
+        getActivity().getContentResolver().delete(DataContract.StoryEntry.CONTENT_URI,
+                                                  null,
+                                                  new String[]{});
     }
 
     private void startSync() {
@@ -169,9 +192,13 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
-        if (mPosition != ListView.INVALID_POSITION) {
-            mListView.smoothScrollToPosition(mPosition);
+        if (data.getCount() > 0) {
+            mPosition = ListView.INVALID_POSITION;
+            mEmptyView.setVisibility(View.INVISIBLE);
+        } else {
+            mEmptyView.setVisibility(View.VISIBLE);
         }
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -192,7 +219,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onSyncFailed(String error) {
         mSwipeRefreshLayout.setRefreshing(false);
-        Toast.makeText(getActivity(),error,Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
     }
 
 }

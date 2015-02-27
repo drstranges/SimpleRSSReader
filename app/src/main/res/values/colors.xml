@@ -5,5 +5,10 @@
     <color name="accentColor">#FF4081</color>
     <color name="topColor">#C5CAE9</color>
 
+    <color name="refresh_progress_1">@android:color/holo_red_light</color>
+    <color name="refresh_progress_2">@android:color/holo_orange_light</color>
+    <color name="refresh_progress_3">@android:color/holo_green_light</color>
+
+    <color name="light_blue">#ff64c2f4</color>
 
 </resources>

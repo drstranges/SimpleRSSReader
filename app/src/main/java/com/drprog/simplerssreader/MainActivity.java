@@ -2,11 +2,11 @@ package com.drprog.simplerssreader;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 
-
-public class MainActivity extends ActionBarActivity implements MainFragment.Callback{
+public class MainActivity extends ActionBarActivity implements MainFragment.Callback {
 
     private Toolbar mToolbar;
     private boolean mTwoPane;
@@ -29,7 +29,7 @@ public class MainActivity extends ActionBarActivity implements MainFragment.Call
                         .replace(R.id.detail_container, new DetailFragment(), DetailFragment.TAG)
                         .commit();
             }
-        }else{
+        } else {
             mTwoPane = false;
             //getSupportActionBar().setElevation(0f);
         }
@@ -37,6 +37,13 @@ public class MainActivity extends ActionBarActivity implements MainFragment.Call
 
     @Override
     public void onItemSelected(String detailUrl) {
+        if (detailUrl == null) {
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag(DetailFragment.TAG);
+            if (fragment != null) {
+                getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+            }
+            return;
+        }
         if (mTwoPane) {
 
             DetailFragment fragment = DetailFragment.newInstance(detailUrl);
@@ -50,5 +57,6 @@ public class MainActivity extends ActionBarActivity implements MainFragment.Call
             startActivity(intent);
         }
     }
+
 
 }

@@ -1,7 +1,6 @@
 package com.drprog.simplerssreader.sync;
 
 import android.content.ContentValues;
-import android.content.Context;
 
 import com.drprog.simplerssreader.data.DataProvider;
 
@@ -13,12 +12,13 @@ import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created on 26.02.2015.
+ * Helper Class for providing XML Parser functionality
  */
 public class ParserHelper {
 
@@ -32,9 +32,10 @@ public class ParserHelper {
     private static final String IMG_REGEX = "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>";
     private static final Pattern IMG_PATTERN = Pattern.compile(IMG_REGEX);
 
-    private static final SimpleDateFormat PUB_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+    private static final SimpleDateFormat PUB_DATE_FORMAT =
+            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
-    public static ContentValues[] parseXML(Context context, String response)
+    public static ContentValues[] parseXML(String response)
             throws XmlPullParserException {
         XmlPullParserFactory xmlParserFactory = XmlPullParserFactory.newInstance();
         XmlPullParser xmlParser = xmlParserFactory.newPullParser();
@@ -49,9 +50,9 @@ public class ParserHelper {
     private static ContentValues[] parse(XmlPullParser xmlParser) {
         Vector<ContentValues> vector = new Vector<ContentValues>();
         int event;
-        String text=null;
+        String text = null;
 
-        String description=null;
+        String description = null;
 
         String pubDate = null;
         String title = null;
@@ -62,8 +63,8 @@ public class ParserHelper {
         try {
             event = xmlParser.getEventType();
             while (event != XmlPullParser.END_DOCUMENT) {
-                String name=xmlParser.getName();
-                switch (event){
+                String name = xmlParser.getName();
+                switch (event) {
                     case XmlPullParser.START_TAG:
                         if (name.equalsIgnoreCase(TAG_ITEM)) {
                             text = null;
@@ -79,21 +80,17 @@ public class ParserHelper {
                         text = xmlParser.getText();
                         break;
                     case XmlPullParser.END_TAG:
-                        if(name.equalsIgnoreCase(TAG_TITLE)){
+                        if (name.equalsIgnoreCase(TAG_TITLE)) {
                             title = text;
-                        }
-                       else if(name.equalsIgnoreCase(TAG_LINK)){
+                        } else if (name.equalsIgnoreCase(TAG_LINK)) {
                             linkUrl = text;
-                        }
-                        else if(name.equalsIgnoreCase(TAG_PUB_DATE)){
+                        } else if (name.equalsIgnoreCase(TAG_PUB_DATE)) {
                             pubDate = text;
-                        }
-                        else if(name.equalsIgnoreCase(TAG_AUTHOR)){
+                        } else if (name.equalsIgnoreCase(TAG_AUTHOR)) {
                             author = text;
-                        }
-                        else if(name.equalsIgnoreCase(TAG_DESCRIPTION)){
+                        } else if (name.equalsIgnoreCase(TAG_DESCRIPTION)) {
                             description = text;
-                        }else if (name.equalsIgnoreCase(TAG_ITEM)){
+                        } else if (name.equalsIgnoreCase(TAG_ITEM)) {
                             Long dateMs = null;
                             try {
                                 Date date = PUB_DATE_FORMAT.parse(pubDate);
@@ -101,17 +98,18 @@ public class ParserHelper {
                             } catch (ParseException e1) {
                                 e1.printStackTrace();
                             }
-                            if (description != null){
+                            if (description != null) {
                                 Matcher matcher = IMG_PATTERN.matcher(description);
                                 if (matcher.find()) {
                                     imageUrl = matcher.group(1);
                                 }
                             }
-                            ContentValues cv = DataProvider.buildCV(dateMs,title, linkUrl, author, imageUrl);
-                            if (cv != null){
+                            ContentValues cv =
+                                    DataProvider.buildCV(dateMs, title, linkUrl, author, imageUrl);
+                            if (cv != null) {
                                 vector.add(cv);
                             }
-                        }else{
+                        } else {
                             //do nothing
                         }
                         break;

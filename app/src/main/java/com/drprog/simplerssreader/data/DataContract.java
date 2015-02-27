@@ -15,7 +15,7 @@ public class DataContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     /**
-     *  Class that defines the table contents of the story table.
+     * Class that defines the table contents of the story table.
      */
     public static final class StoryEntry implements BaseColumns {
         public static final String ENTRY_PATH = "stories";
@@ -52,26 +52,11 @@ public class DataContract {
 
         public static long getStartDateFromUri(Uri uri) {
             String dateString = uri.getQueryParameter(COLUMN_PUB_DATE);
-            if (null != dateString && dateString.length() > 0)
+            if (null != dateString && dateString.length() > 0) {
                 return Long.parseLong(dateString);
-            else
-                return 0;
+            } else { return 0; }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

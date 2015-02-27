@@ -1,18 +1,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                tools:context="com.drprog.simplerssreader.MainActivity">
+
     <include
         android:id="@+id/app_bar"
         layout="@layout/app_bar"/>
 
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:id="@+id/fragment_main"
-             android:layout_below="@+id/app_bar"
-             android:name="com.drprog.simplerssreader.MainFragment"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context="com.drprog.simplerssreader.MainFragment"
-             tools:layout = "@android:layout/list_content"/>
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/fragment_main"
+              android:layout_below="@+id/app_bar"
+              android:name="com.drprog.simplerssreader.MainFragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="com.drprog.simplerssreader.MainFragment"
+              tools:layout="@android:layout/list_content"/>
 </RelativeLayout>

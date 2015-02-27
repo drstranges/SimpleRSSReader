@@ -4,15 +4,16 @@
                 android:layout_height="wrap_content"
                 android:minHeight="88dp"
                 android:padding="16dp"
-    >
+                android:background="@drawable/touch_selector">
 
-    <ImageView
+    <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/imageView"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        />
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"/>
 
     <TextView
         android:id="@+id/titleView"
@@ -30,7 +31,7 @@
         />
 
     <TextView
-        android:id="@+id/timeView"
+        android:id="@+id/dateView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -49,7 +50,7 @@
         android:singleLine="true"
         android:ellipsize="end"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/timeView"
+        android:layout_below="@+id/dateView"
         android:layout_marginLeft="56dp"
         android:text="Author"
         android:textAppearance="?android:attr/textAppearanceSmall"

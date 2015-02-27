@@ -1,14 +1,26 @@
-<android.support.v4.widget.SwipeRefreshLayout
-    android:id="@+id/swipe_refresh_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
-    <ListView
-        android:id="@+id/story_list"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/story_list"
+            layout="@layout/list_view"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <TextView
+        android:id="@android:id/empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"/>
-
-</android.support.v4.widget.SwipeRefreshLayout>
+        android:text="@string/empty_list_message"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:visibility="invisible"/>
+</FrameLayout>
